@@ -28,45 +28,45 @@ water_1_df <- water_1_df %>%
 
 ### GENTLEMAN 2
 
-water_2_df <- read.csv("data/2/water.csv",
+#water_2_df <- read.csv("data/2/water.csv",
                        header = TRUE, skip = 2, check.names = FALSE, stringsAsFactors = FALSE)
 
-colnames(water_2_df) <- c("start_time", "amount", "custom", "update_time", 
+#colnames(water_2_df) <- c("start_time", "amount", "custom", "update_time", 
                           "create_time", "time_offset", "deviceuuid", 
                           "unit_amount", "comment", "pkg_name", "datauuid")
 
-water_2_df <- water_2_df %>% 
-  select("start_time", "amount") %>% 
-  mutate(time = ymd_hms(start_time),
-         day = day(time),
-         weekday = wday(time, label = TRUE, abbr = FALSE),
-         hour = hour(time),
-         dayHour = paste(day, hour, sep = "h"),
-         date = format(time, "%Y.%m.%d"),
-         name = "Gentleman2"
-  )
+# water_2_df <- water_2_df %>% 
+#   select("start_time", "amount") %>% 
+#   mutate(time = ymd_hms(start_time),
+#          day = day(time),
+#          weekday = wday(time, label = TRUE, abbr = FALSE),
+#          hour = hour(time),
+#          dayHour = paste(day, hour, sep = "h"),
+#          date = format(time, "%Y.%m.%d"),
+#          name = "Gentleman2"
+#   )
 
 ### GENTLEMAN 3 
 
-water_3_df <- read.csv("data/3/water.csv",
-                       header = TRUE, skip = 2, check.names = FALSE, stringsAsFactors = FALSE)
-
-colnames(water_3_df) <- c("start_time", "amount", "custom", "update_time", 
-                          "create_time", "time_offset", "deviceuuid", 
-                          "unit_amount", "comment", "pkg_name", "datauuid")
-
-water_3_df <- water_3_df %>% 
-  select("start_time", "amount") %>% 
-  mutate(time = ymd_hms(start_time),
-         day = day(time),
-         weekday = wday(time, label = TRUE, abbr = FALSE),
-         hour = hour(time),
-         dayHour = paste(day, hour, sep = "h"),
-         date = format(time, "%Y.%m.%d"),
-         name = "Gentleman3"
-  )
-
-
+# water_3_df <- read.csv("data/3/water.csv",
+#                        header = TRUE, skip = 2, check.names = FALSE, stringsAsFactors = FALSE)
+# 
+# colnames(water_3_df) <- c("start_time", "amount", "custom", "update_time", 
+#                           "create_time", "time_offset", "deviceuuid", 
+#                           "unit_amount", "comment", "pkg_name", "datauuid")
+# 
+# water_3_df <- water_3_df %>% 
+#   select("start_time", "amount") %>% 
+#   mutate(time = ymd_hms(start_time),
+#          day = day(time),
+#          weekday = wday(time, label = TRUE, abbr = FALSE),
+#          hour = hour(time),
+#          dayHour = paste(day, hour, sep = "h"),
+#          date = format(time, "%Y.%m.%d"),
+#          name = "Gentleman3"
+#   )
+# 
+# 
 
 
 ################################################################################
@@ -75,7 +75,7 @@ water_3_df <- water_3_df %>%
 
 ### GENTLEMAN 1
 
-step_1_df <- read.csv("data/1/step_count.csv",
+step_1_df <- read.csv("data/1/steps.csv",
                     header = TRUE, skip = 2, check.names = FALSE, stringsAsFactors = FALSE)
 
 
@@ -109,11 +109,12 @@ step_1_df$dayHour <- paste(step_1_df$day, step_1_df$hour, sep="h")
 ################################################################################
 ################################################################################
 
+### GENTLEMAN 1
 
-sleep_df <- read.csv("C:/my_repos/data_visualization_techniques/project_2/20_12/sleep.csv",
+sleep_1_df <- read.csv("data/1/sleep.csv",
                      header = TRUE, skip = 2, check.names = FALSE, stringsAsFactors = FALSE)
 
-colnames(sleep_df) <- sub("^com\\.samsung\\.health\\.sleep\\.", "", c("original_efficiency", "mental_recovery", "factor_01", "factor_02",
+colnames(sleep_1_df) <- sub("^com\\.samsung\\.health\\.sleep\\.", "", c("original_efficiency", "mental_recovery", "factor_01", "factor_02",
                                                                       "factor_03", "factor_04", "factor_05", "factor_06", "factor_07", 
                                                                       "factor_08", "factor_09", "factor_10", "has_sleep_data", "combined_id", 
                                                                       "sleep_type", "data_version", "physical_recovery", "original_wake_up_time", 
@@ -126,7 +127,7 @@ colnames(sleep_df) <- sub("^com\\.samsung\\.health\\.sleep\\.", "", c("original_
                                                                       "com.samsung.health.sleep.deviceuuid", "com.samsung.health.sleep.comment", 
                                                                       "com.samsung.health.sleep.pkg_name", "com.samsung.health.sleep.end_time", 
                                                                       "com.samsung.health.sleep.datauuid"))
-sleep_df <- sleep_df %>% 
+sleep_1_df <- sleep_1_df %>% 
   select("start_time", "end_time") %>% 
   mutate(start_time = ymd_hms(start_time),
          end_time = ymd_hms(end_time),
