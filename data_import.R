@@ -18,22 +18,21 @@ colnames(water_1_df) <- c("start_time", "amount", "custom", "update_time",
 water_1_df <- water_1_df %>% 
   select("start_time", "amount") %>% 
   mutate(time = ymd_hms(start_time),
-         day = day(time),
          weekday = wday(time, label = TRUE, abbr = FALSE),
-         hour = hour(time),
-         dayHour = paste(day, hour, sep = "h"),
          date = format(time, "%Y.%m.%d"),
          name = "Gentleman1"
-  )
+  ) %>% 
+  group_by(date, weekday) %>% 
+  summarise(amount = sum(amount))
 
 ### GENTLEMAN 2
 
 #water_2_df <- read.csv("data/2/water.csv",
-                       header = TRUE, skip = 2, check.names = FALSE, stringsAsFactors = FALSE)
+#                       header = TRUE, skip = 2, check.names = FALSE, stringsAsFactors = FALSE)
 
 #colnames(water_2_df) <- c("start_time", "amount", "custom", "update_time", 
-                          "create_time", "time_offset", "deviceuuid", 
-                          "unit_amount", "comment", "pkg_name", "datauuid")
+#                          "create_time", "time_offset", "deviceuuid", 
+#                          "unit_amount", "comment", "pkg_name", "datauuid")
 
 # water_2_df <- water_2_df %>% 
 #   select("start_time", "amount") %>% 
