@@ -6,188 +6,261 @@ library(ggplot2)
 library(dplyr)
 library(ggrepel)
 library(shinycssloaders)
+library(shinydashboard)
+library(shinydashboardPlus)
+library(dashboardthemes)
 
-
-server <- function(input, output, session) {
-  
-  ### SLEEP ###
-  
-  ## wykres boxplot liczba godzin snu w zależności od dnia tygodnia 
-  
-  # output$boxPlotSleepHours <- renderPlot({
-  #   ggplot()
-  # })
-  
-  ## wykres kolumnowy godzina rozpoczęcia snu w zal. od dnia tygodnia
-  
-  # output$colPlotSleepStart <- renderPlot({
-  #   ggplot()
-  # })
-  
-  ## wykres gęstosci godzina zakończenia snu w zal. od dnia tygodnia
-  
-  # output$densityPlotSleepEnd <- renderPlot({
-  #   ggplot()
-  # })
-  
-  ### STEPS ###
-  
-  ## wykres kolumnowy liczby przebiegniętych kroków (run_step)
-  
-  # output$colPlotRunning <- renderPlot({
-  #   ggplot()
-  # })
-  
-  ## wykres kolumnowy kroków dla poszczególnych dni
-  
-  # output$colPlotSteps <- renderPlot({
-  #   ggplot()
-  # })
-  
-  
-  ### WATER ###
-  
-  ## wykres korelacji woda/kroki
-  
-  # output$pointPlotWaterSteps <- renderPlot({
-  #   ggplot()
-  # })
-  
-  ## wykres boxplot/violinplot woda w zal. od dnia tygodnia
-  
-  output$plotWaterWeekday <- renderPlot({
-    ggplot(data = water_df %>% filter(weekday == input$waterDayOfWeek)) +
-    geom_violin(aes(x = name, y = amount, fill = name))+
-    geom_boxplot(aes(x = name, y = amount))+
-      ylim(c(500, 2500))+
-      scale_fill_discrete(name = "Person: ")+
-      theme_minimal()
-        
-  })
-  
-  
-}
-
-### UI1 - sleep ###
-
-ui1 <- fluidPage(
-                # titlePanel("Samochody: moc vs cena"),
-                # 
-                #  sidebarLayout(
-                #    sidebarPanel(
-                #      selectInput(
-                #        inputId = "color",
-                #        label = "Parametr:",
-                #        choices = c(
-                #          "Rodzaj paliwa" = "Rodzaj.paliwa",
-                #          "Liczba drzwi" = "Liczba.drzwi",
-                #          "Skrzynia biegow" = "Skrzynia.biegow"
-                #        )
-                #      ),
-                #      width = 3
-                #    ),
-                #    mainPanel(#plotOutput("pointPlot"),
-                #      ### Zadanie 7 ###
-                #      shinycssloaders::withSpinner(plotOutput("pointPlot"),
-                #                                   type = getOption("spinner.type", default = 1),
-                #                                   color = getOption("spinner.color", default = "#0275D8"),
-                #                                   size = getOption("spinner.size", default = 1)
-                #      ),
-                #      ### Koniec - Zadanie 7 ###
-                #      width = 9)
-                #  )
-                 )
-
-
-### UI2 - STEPS ###
-
-ui2 <- fluidPage(
-#                   titlePanel("Rozkład ceny samochodów w zależności od roku produkcji"),
-#                  ### Koniec - Zadanie 1 ###                  
-#                  sidebarLayout(
-#                    sidebarPanel(
-#                      ### Zadanie 5 ###
-#                      sliderInput(
-#                        inputId = "rok",
-#                        label = "Lata:",
-#                        min = min(auta2012$Rok.produkcji),
-#                        max = max(auta2012$Rok.produkcji),
-#                        value = c(1980, 2007)
-#                      ),
-#                      ### Koniec - Zadanie 5 ### 
-#                      width = 3
-#                    ),
-#                    mainPanel(
-#                      ### Zadanie 4 ###
-#                      shiny::markdown(
-#                        "Potrzebujemy: \n 1. suwak, na którym można wybrać zakres lat z którego rozpatrujemy samochody \n 2. wykres boxplot cen samochodów w PLN dla wybranych lat z suwaka"
-#                      ),
-#                      ### Koniec - Zadanie 4 ### 
-#                      ### Zadanie 5 ###
-#                      plotOutput("boxPlot"),
-#                      ### Koniec - Zadanie 5 ### 
-#                      width = 9)
-#                  )
-  )
-
-
-### UI3 - WATER ###
-
- ui3 <- fluidPage(
-                titlePanel("Water intake by weekday"),
-                 
-                 sidebarLayout(
-                   sidebarPanel(
-                     
-                     selectInput(
-                       inputId = "waterDayOfWeek",
-                       label = "Day of week:",
-                       choices = unique(water_df$weekday)
-                     ),
-                     
-                     width = 3
-                   ),
-                   
-                   mainPanel(
-                     
-                     shiny::markdown(
-                       "text"
-                     ),
-                     
-                     plotOutput("plotWaterWeekday"),
-                     
-                     width = 9)
-                 )
-   )
+### theme
 
 
 
+theme_blue <- shinyDashboardThemeDIY(
+  appFontFamily = "FuturaMedium" 
+  ,appFontColor = "#edc9c7"
+    ,primaryFontColor = "#434C5E"
+    ,infoFontColor = "#434C5E"
+    ,successFontColor = "#434C5E"
+    ,warningFontColor = "#434C5E"
+    ,dangerFontColor = "#434C5E"
+    
+  ,bodyBackColor = "#068fa4" 
+    ,logoBackColor = "#068fa4" 
+    
+  ,headerButtonBackColor = "#068fa4" # kolor  na ikonce chowania
+    ,headerButtonIconColor = "#edc9c7" # kolor pasków na ikonce chowania sidebaru
+    ,headerButtonBackColorHover = "#edc9c7" # hover ikonki chowania
+    ,headerButtonIconColorHover = "#068fa4" # kolor paskow podczas hovera
+    ,headerBackColor = "#068fa4" # header
+    ,headerBoxShadowColor = "" #cien pod headerem - nie zmieniac
+  ,headerBoxShadowSize = "0px 0px 0px"  # nie zmieniac
+  
+  
+  ,sidebarBackColor = "#068fa4"
+    ,sidebarPadding = 0
+  
+  ,sidebarMenuBackColor = "transparent"
+  ,sidebarMenuPadding = 5
+  ,sidebarMenuBorderRadius = 1
+  
+  ,sidebarShadowRadius = "" 
+  ,sidebarShadowColor = "0px 0px 0px"
+  
+  ,sidebarUserTextColor = "#D8DEE9"
+    
+  ,sidebarSearchBackColor = "#4C566A"
+    ,sidebarSearchIconColor = "#068fa4"
+    ,sidebarSearchBorderColor = "#4C566A"
+    
+  ,sidebarTabTextColor = "#ECEFF4"
+    ,sidebarTabTextSize = 14
+  ,sidebarTabBorderStyle = "none"
+  ,sidebarTabBorderColor = "#068fa4"
+    ,sidebarTabBorderWidth = 0
+  
+  ,sidebarTabBackColorSelected = "#edc9c7"
+    ,sidebarTabTextColorSelected = "#068fa4" 
+    ,sidebarTabRadiusSelected = "20px" 
+  
+  ,sidebarTabBackColorHover = "#edc9c7"
+    ,sidebarTabTextColorHover = "#068fa4"
+    ,sidebarTabBorderStyleHover = "none"
+  ,sidebarTabBorderColorHover = "none"
+  ,sidebarTabBorderWidthHover = 0
+  ,sidebarTabRadiusHover = "20px" 
+  
+  ,boxBackColor = "#068fa4" 
+    ,boxBorderRadius = 1
+  ,boxShadowSize = "0px 0px 0px"
+  ,boxShadowColor = ""
+  ,boxTitleSize = 18
+  ,boxDefaultColor = "#068fa4"
+    ,boxPrimaryColor = "#068fa4"
+    ,boxInfoColor = "#068fa4"
+    ,boxSuccessColor = "#068fa4"
+    ,boxWarningColor = "#068fa4"
+    ,boxDangerColor = "#068fa4"
+    
+  ,tabBoxTabColor = "#068fa4"
+    ,tabBoxTabTextSize = 16
+  ,tabBoxTabTextColor = "#068fa4"
+    ,tabBoxTabTextColorSelected = "#068fa4"
+    ,tabBoxBackColor = "#BF616A"
+    ,tabBoxHighlightColor = "#4C566A"
+    ,tabBoxBorderRadius = 1
+  
+  ,buttonBackColor = "#068fa4"
+    ,buttonTextColor = "#2E3440"
+    ,buttonBorderColor = "#2E3440"
+    ,buttonBorderRadius = 1
+  
+  ,buttonBackColorHover = "#068fa4"
+    ,buttonTextColorHover = "#edc9c7"
+    ,buttonBorderColorHover = "#edc9c7"
+    
+  ,textboxBackColor = "#068fa4" 
+    ,textboxBorderColor = "#edc9c7" 
+    ,textboxBorderRadius = 5
+  ,textboxBackColorSelect = "#068fa4"
+    ,textboxBorderColorSelect = "#edc9c7"
+    
+  ,tableBackColor = "#068fa4"
+    ,tableBorderColor = "#edc9c7"
+    ,tableBorderTopSize = 1
+  ,tableBorderRowSize = 1
+  
+)
+ 
 
-app_ui <- navbarPage(
-  title = "Health data analysis",
-  tabPanel("Sleep", ui1),
-  tabPanel("Steps", ui2,
-           icon = icon("database")),
-  tabPanel("Water intake", ui3,
-           icon = icon("database")),
+### server
+ 
+ server <- function(input, output, session) {
+   
+   ### SLEEP ###
+   
+   ## wykres boxplot liczba godzin snu w zależności od dnia tygodnia 
+   
+   # output$boxPlotSleepHours <- renderPlot({
+   #   ggplot()
+   # })
+   
+   ## wykres kolumnowy godzina rozpoczęcia snu w zal. od dnia tygodnia
+   
+   # output$colPlotSleepStart <- renderPlot({
+   #   ggplot()
+   # })
+   
+   ## wykres gęstosci godzina zakończenia snu w zal. od dnia tygodnia
+   
+   # output$densityPlotSleepEnd <- renderPlot({
+   #   ggplot()
+   # })
+   
+   ### STEPS ###
+   
+   ## wykres kolumnowy liczby przebiegniętych kroków (run_step)
+   
+   # output$colPlotRunning <- renderPlot({
+   #   ggplot()
+   # })
+   
+   ## wykres kolumnowy kroków dla poszczególnych dni
+   
+   # output$colPlotSteps <- renderPlot({
+   #   ggplot()
+   # })
+   
+   
+   ### WATER ###
+   
+   ## wykres korelacji woda/kroki
+   
+   output$pointPlotWaterSteps <- renderPlot({
+     
+     steps_modified <- steps_df %>% 
+       group_by(date) %>% 
+       summarise(total_steps = sum(count))
+     
+     steps_modified %>% inner_join(water_df, by = "date") %>% 
+     ggplot()+
+       geom_point(aes(x = total_steps, y = amount, color = name))
+   })
+   
+   output$textWaterSteps <- renderText({
+     "text Water Steps"
+   })
+   
+   ## wykres boxplot/violinplot woda w zal. od dnia tygodnia
+   
+   output$waterDayOfWeek <- renderUI({
+     selectInput(
+       inputId = "waterDayOfWeek",
+       label = "Day of week:",
+       choices = unique(water_df$weekday)
+     )
+   })
+  
+   
+   output$plotWaterWeekday <- renderPlot({
+     ggplot(data = water_df %>% filter(weekday == input$waterDayOfWeek)) +
+       geom_violin(aes(x = name, y = amount, fill = name))+
+       geom_boxplot(aes(x = name, y = amount))+
+       ylim(c(500, 2500))+
+       scale_fill_discrete(name = "Person: ")+
+       theme_minimal()
+     
+   })
+   
+   output$textWaterWeekday <- renderText({
+     "text Water Weekday"
+   })
+   
+   
+ }
 
-  theme = bslib::bs_theme(bootswatch = "cosmo"),
-  
-  
-  footer = shiny::HTML("
-                <footer class='text-center text-sm-start' style='width:100%;'>
-                <hr>
-                <p class='text-center' style='font-size:12px;'>
-                  © 2021 Copyright:
-                  <a class='text-dark' href='https://www.mi2.ai/'>MI2</a>
-                </p>
-                </footer>
-                "),
-  
-  header = tags$head(tags$link(rel = "stylesheet", href = "https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"))
+
+### UI
+
+## header
+
+header <- dashboardHeader(
+  title = "Health data analysis"
   
 )
 
-shinyApp(app_ui, server)
+## sidebar
+
+sidebar <- dashboardSidebar(
+  sidebarMenu(
+    menuItem("Sleep", tabName = "sleep"),
+    menuItem("Steps", tabName = "steps"),
+    menuItem("Water", tabName = "water")
+  ),
+  width = 250
+  
+)
+
+## body
+
+body <- dashboardBody(
+  tabItem(
+    tabName = "water",
+    
+    fluidRow(
+      box(title = "Water intake"),
+      column(width = 8,
+             shinycssloaders::withSpinner(plotOutput("plotWaterWeekday"),
+                                          type = getOption("spinner.type", default = 5),
+                                          color = getOption("spinner.color", default = "#edc9c7"))
+             ),
+      column(width = 4,
+             textOutput("textWaterWeekday"),
+             br(),
+             uiOutput("waterDayOfWeek"))
+      
+    ),
+    fluidRow(
+      box(title = "Correlation between water intake and daily steps"),
+      column(width = 8, 
+             shinycssloaders::withSpinner(plotOutput("pointPlotWaterSteps"),
+                                          type = getOption("spinner.type", default = 5),
+                                          color = getOption("spinner.color", default = "#edc9c7"))),
+      column(width = 4,
+             textOutput("textWaterSteps"))
+    )
+  ),
+  theme_blue
+)
+
+## ui 
+
+ui <- dashboardPage(
+  
+  header,
+  sidebar,
+  body
+  
+)
+
+shinyApp(ui, server)
 
 
