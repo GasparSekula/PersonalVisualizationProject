@@ -95,15 +95,14 @@ colnames(step_1_df) <-  sub("^com.samsung.health.step_count\\.", "", c("duration
                                                                      "com.samsung.health.step_count.datauuid"))
 
 
-step_1_df <- step_1_df %>% select("run_step", "walk_step", "start_time", "count", "speed", "distance")
+step_1_df <- step_1_df %>% select("run_step", "walk_step", "start_time", "count", "speed", "distance") %>% 
+  mutate(time = ymd_hms(start_time),
+         weekday = wday(time, label = TRUE, abbr = FALSE),
+         dayHour = paste(day(time), hour(time), sep = "h"),
+         date = format(time, "%Y.%m.%d"),
+         name = "Gentleman1")
 
-step_1_df$time <- ymd_hms(step_1_df$start_time)
-step_1_df$day <- day(step_1_df$time)
-step_1_df$weekday <- wday(step_1_df$time, label = TRUE, abbr = FALSE)  
-step_1_df$hour <- hour(step_1_df$time)
-step_1_df$minute <- minute(step_1_df$time)
-step_1_df$dayHour <- paste(step_1_df$day, step_1_df$hour, sep="h")
-step_1_df$name <- "Gentleman1"
+
 
 ################################################################################
 ################################################################################
@@ -137,3 +136,4 @@ sleep_1_df <- sleep_1_df %>%
          day = day(end_time),
          weekday = wday(end_time, label = TRUE, abbr = FALSE),
          name = "Gentleman1")
+
