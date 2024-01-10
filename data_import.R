@@ -18,7 +18,7 @@ colnames(water_1_df) <- c("start_time", "amount", "custom", "update_time",
 water_1_df <- water_1_df %>% 
   select("start_time", "amount") %>% 
   mutate(time = ymd_hms(start_time),
-         weekday = wday(time, label = TRUE, abbr = FALSE),
+         weekday = wday(time, label = TRUE, abbr = FALSE, locale = "en_US"),
          date = format(time, "%Y.%m.%d"),
          name = "Gentleman1"
   ) %>% 
@@ -97,7 +97,7 @@ colnames(step_1_df) <-  sub("^com.samsung.health.step_count\\.", "", c("duration
 
 step_1_df <- step_1_df %>% select("run_step", "walk_step", "start_time", "count", "speed", "distance") %>% 
   mutate(time = ymd_hms(start_time),
-         weekday = wday(time, label = TRUE, abbr = FALSE),
+         weekday = wday(time, label = TRUE, abbr = FALSE, locale = "en_US"),
          dayHour = paste(day(time), hour(time), sep = "h"),
          date = format(time, "%Y.%m.%d"),
          name = "Gentleman1")
@@ -134,6 +134,6 @@ sleep_1_df <- sleep_1_df %>%
                             floor(as.numeric(difftime(end_time, start_time, units = "mins")) / 60), 
                             as.numeric(difftime(end_time, start_time, units = "mins")) %% 60),
          day = day(end_time),
-         weekday = wday(end_time, label = TRUE, abbr = FALSE),
+         weekday = wday(end_time, label = TRUE, abbr = FALSE, locale = "en_US"),
          name = "Gentleman1")
 
