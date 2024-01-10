@@ -21,7 +21,7 @@ library(showtext)
 # default font
 loadfonts() 
 showtext_auto()
-font_add("Inter", regular = "C:/my_repos/PersonalVisualizationProject/Inter/Inter-VariableFont_slnt,wght.ttf")
+#font_add("Inter", regular = "C:/my_repos/PersonalVisualizationProject/Inter/Inter-VariableFont_slnt,wght.ttf")
 
 
 ### theme
@@ -171,9 +171,26 @@ plot_theme <- theme(panel.grid = element_line(colour = "#edc9c7",linetype = "dot
    
    ## wykres kolumnowy kroków dla poszczególnych dni
    
-   # output$colPlotSteps <- renderPlot({
-   #   ggplot()
-   # })
+   output$colPlotSteps <- renderPlot({
+     weekdays <- distinct(steps_df[, c("date", "weekday")])
+     
+     
+     steps_df  %>% 
+       group_by(date, name) %>%
+       summarise(total_steps = sum(count)) %>%
+       inner_join(weekdays) %>% 
+       group_by(weekday, name) %>% 
+       summarise(avg_steps = mean(total_steps)) %>% 
+       ggplot(aes(fill = name, x = weekday, y = avg_steps)) +
+       geom_bar(position="dodge", stat="identity") +
+       scale_fill_manual(values = c("Gentleman1" = "red", "Gentleman2" = "gold", 
+                                     "Gentleman3" = "orange"),
+                          name = "Person:")+
+       labs(title = "Number of steps by day",
+            x = "Day of the week",
+            y = "Number of steps")+
+       plot_theme
+  })
    
    
    ### WATER ###
@@ -293,7 +310,12 @@ body <- dashboardBody(
   tabItem(
     tabName = "Sleep",
     fluidRow(
-      box(title = "wduibwdi"))
+      box(title = "What days do we walk the most?"),
+      column(width = 8,
+             shinycssloaders::withSpinner(plotOutput("colPlotSteps"),
+                                          type = getOption("spinner.type", default = 5),
+                                          color = getOption("spinner.color", default = "#edc9c7"))
+      ))
   ),
   tabItem(
     tabName = "Steps"
