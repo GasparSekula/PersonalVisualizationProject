@@ -1,27 +1,39 @@
-### libraries 
+### libraries and packages
 
 library(shiny)
 library(dplyr)
 library(ggplot2)
+library(plotly)
 library(dplyr)
 library(ggrepel)
 library(shinycssloaders)
 library(shinydashboard)
 library(shinydashboardPlus)
 library(dashboardthemes)
+library(extrafont)
+library(showtext)
+
+### fonts 
+
+# import fonts - takes ~5 minutes 
+# font_import()
+
+# default font
+loadfonts() 
+showtext_auto()
+font_add("Inter", regular = "C:/my_repos/PersonalVisualizationProject/Inter/Inter-VariableFont_slnt,wght.ttf")
+
 
 ### theme
 
-
-
 theme_blue <- shinyDashboardThemeDIY(
-  appFontFamily = "FuturaMedium" 
+  appFontFamily = "Helvetica" 
   ,appFontColor = "#edc9c7"
-    ,primaryFontColor = "#434C5E"
-    ,infoFontColor = "#434C5E"
-    ,successFontColor = "#434C5E"
-    ,warningFontColor = "#434C5E"
-    ,dangerFontColor = "#434C5E"
+    ,primaryFontColor = "#edc9c7"
+    ,infoFontColor = "#edc9c7"
+    ,successFontColor = "#edc9c7"
+    ,warningFontColor = "#edc9c7"
+    ,dangerFontColor = "#edc9c7"
     
   ,bodyBackColor = "#068fa4" 
     ,logoBackColor = "#068fa4" 
@@ -45,13 +57,13 @@ theme_blue <- shinyDashboardThemeDIY(
   ,sidebarShadowRadius = "" 
   ,sidebarShadowColor = "0px 0px 0px"
   
-  ,sidebarUserTextColor = "#D8DEE9"
+  ,sidebarUserTextColor = "#edc9c7"
     
-  ,sidebarSearchBackColor = "#4C566A"
+  ,sidebarSearchBackColor = "#edc9c7"
     ,sidebarSearchIconColor = "#068fa4"
-    ,sidebarSearchBorderColor = "#4C566A"
+    ,sidebarSearchBorderColor = "#edc9c7"
     
-  ,sidebarTabTextColor = "#ECEFF4"
+  ,sidebarTabTextColor = "#edc9c7"
     ,sidebarTabTextSize = 14
   ,sidebarTabBorderStyle = "none"
   ,sidebarTabBorderColor = "#068fa4"
@@ -84,13 +96,13 @@ theme_blue <- shinyDashboardThemeDIY(
     ,tabBoxTabTextSize = 16
   ,tabBoxTabTextColor = "#068fa4"
     ,tabBoxTabTextColorSelected = "#068fa4"
-    ,tabBoxBackColor = "#BF616A"
-    ,tabBoxHighlightColor = "#4C566A"
+    ,tabBoxBackColor = "#edc9c7"
+    ,tabBoxHighlightColor = "#edc9c7"
     ,tabBoxBorderRadius = 1
   
   ,buttonBackColor = "#068fa4"
-    ,buttonTextColor = "#2E3440"
-    ,buttonBorderColor = "#2E3440"
+    ,buttonTextColor = "#edc9c7"
+    ,buttonBorderColor = "#edc9c7"
     ,buttonBorderRadius = 1
   
   ,buttonBackColorHover = "#068fa4"
@@ -114,6 +126,8 @@ theme_blue <- shinyDashboardThemeDIY(
 ### server
  
  server <- function(input, output, session) {
+   
+   ### HOME PAGE ###
    
    ### SLEEP ###
    
@@ -160,9 +174,29 @@ theme_blue <- shinyDashboardThemeDIY(
        group_by(date) %>% 
        summarise(total_steps = sum(count))
      
+     
      steps_modified %>% inner_join(water_df, by = "date") %>% 
      ggplot()+
-       geom_point(aes(x = total_steps, y = amount, color = name))
+       geom_point(aes(x = total_steps, y = amount, color = name), size = 3)+
+       scale_color_manual(values = c("Gentleman1" = "red", "Gentleman2" = "gold", 
+                                     "Gentleman3" = "orange"),
+                         name = "Person:")+
+       labs(title = "Correlation between daily steps and water intake",
+            x = "Total daily steps",
+            y = "Amount of water consumed, in ml")+
+       theme(panel.grid = element_line(colour = "#edc9c7",linetype = "dotted"),
+             panel.background = element_rect(fill = "transparent", color = 'transparent'),
+             plot.background = element_rect(fill = "#068fa4", color = 'transparent'),
+             plot.title = element_text(face = "bold", size = 25, hjust = 0.5,
+                                       color = "#edc9c7", family = "Helvetica"),
+             axis.text = element_text(color = "#edc9c7", size = 15, family = "Helvetica"),
+             axis.title = element_text(color = "#edc9c7", size = 18, hjust = 0.5, family = "Helvetica"),
+             legend.key = element_rect(fill = "#068fa4", color = "transparent"),
+             legend.title = element_text(color = "#edc9c7", size = 18, family = "Helvetica"),
+             legend.background = element_rect(fill = "#068fa4", color = 'transparent'),
+             legend.text = element_text(color = "#edc9c7", size = 12, family = "Helvetica")) 
+     
+     
    })
    
    output$textWaterSteps <- renderText({
@@ -185,8 +219,22 @@ theme_blue <- shinyDashboardThemeDIY(
        geom_violin(aes(x = name, y = amount, fill = name))+
        geom_boxplot(aes(x = name, y = amount))+
        ylim(c(500, 2500))+
-       scale_fill_discrete(name = "Person: ")+
-       theme_minimal()
+       scale_fill_manual(values = c("Gentleman1" = "red", "Gentleman2" = "gold", "Gentleman3" = "orange"),
+                         name = "Person:")+
+       labs(title = paste0("Water consumption on ", input$waterDayOfWeek, "s"),
+            x = "",
+            y = "Amount of water consumed, in ml")+
+       theme(panel.grid = element_line(colour = "#edc9c7",linetype = "dotted"),
+             panel.background = element_rect(fill = "transparent", color = 'transparent'),
+             plot.background = element_rect(fill = "#068fa4", color = 'transparent'),
+             plot.title = element_text(face = "bold", size = 25, hjust = 0.5,
+                                       color = "#edc9c7", family = "Helvetica"),
+             axis.text = element_text(color = "#edc9c7", size = 15, family = "Helvetica"),
+             axis.title = element_text(color = "#edc9c7", size = 18, hjust = 0.5, family = "Helvetica"),
+             legend.key = element_rect(fill = "#068fa4", color = "transparent"),
+             legend.title = element_text(color = "#edc9c7", size = 18, family = "Helvetica"),
+             legend.background = element_rect(fill = "#068fa4", color = 'transparent'),
+             legend.text = element_text(color = "#edc9c7", size = 12, family = "Helvetica")) 
      
    })
    
@@ -211,9 +259,9 @@ header <- dashboardHeader(
 
 sidebar <- dashboardSidebar(
   sidebarMenu(
-    menuItem("Sleep", tabName = "sleep"),
-    menuItem("Steps", tabName = "steps"),
-    menuItem("Water", tabName = "water")
+    menuItem("Sleep", tabName = "Sleep"),
+    menuItem("Steps", tabName = "Steps"),
+    menuItem("Water", tabName = "Water")
   ),
   width = 250
   
@@ -223,7 +271,7 @@ sidebar <- dashboardSidebar(
 
 body <- dashboardBody(
   tabItem(
-    tabName = "water",
+    tabName = "Water",
     
     fluidRow(
       box(title = "Water intake"),
@@ -247,6 +295,14 @@ body <- dashboardBody(
       column(width = 4,
              textOutput("textWaterSteps"))
     )
+  ),
+  tabItem(
+    tabName = "Sleep",
+    fluidRow(
+      box(title = "wduibwdi"))
+  ),
+  tabItem(
+    tabName = "Steps"
   ),
   theme_blue
 )
