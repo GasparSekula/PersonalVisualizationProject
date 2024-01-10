@@ -64,7 +64,7 @@ theme_blue <- shinyDashboardThemeDIY(
     ,sidebarSearchBorderColor = "#edc9c7"
     
   ,sidebarTabTextColor = "#edc9c7"
-    ,sidebarTabTextSize = 14
+    ,sidebarTabTextSize = 20
   ,sidebarTabBorderStyle = "none"
   ,sidebarTabBorderColor = "#068fa4"
     ,sidebarTabBorderWidth = 0
@@ -84,7 +84,7 @@ theme_blue <- shinyDashboardThemeDIY(
     ,boxBorderRadius = 1
   ,boxShadowSize = "0px 0px 0px"
   ,boxShadowColor = ""
-  ,boxTitleSize = 18
+  ,boxTitleSize = 36
   ,boxDefaultColor = "#068fa4"
     ,boxPrimaryColor = "#068fa4"
     ,boxInfoColor = "#068fa4"
@@ -121,6 +121,18 @@ theme_blue <- shinyDashboardThemeDIY(
   ,tableBorderRowSize = 1
   
 )
+
+plot_theme <- theme(panel.grid = element_line(colour = "#edc9c7",linetype = "dotted"),
+                    panel.background = element_rect(fill = "transparent", color = 'transparent'),
+                    plot.background = element_rect(fill = "#068fa4", color = 'transparent'),
+                    plot.title = element_text(face = "bold", size = 25, hjust = 0.5,
+                                              color = "#edc9c7", family = "Helvetica"),
+                    axis.text = element_text(color = "#edc9c7", size = 15, family = "Helvetica"),
+                    axis.title = element_text(color = "#edc9c7", size = 18, hjust = 0.5, family = "Helvetica"),
+                    legend.key = element_rect(fill = "#068fa4", color = "transparent"),
+                    legend.title = element_text(color = "#edc9c7", size = 18, family = "Helvetica"),
+                    legend.background = element_rect(fill = "#068fa4", color = 'transparent'),
+                    legend.text = element_text(color = "#edc9c7", size = 12, family = "Helvetica")) 
  
 
 ### server
@@ -184,17 +196,7 @@ theme_blue <- shinyDashboardThemeDIY(
        labs(title = "Correlation between daily steps and water intake",
             x = "Total daily steps",
             y = "Amount of water consumed, in ml")+
-       theme(panel.grid = element_line(colour = "#edc9c7",linetype = "dotted"),
-             panel.background = element_rect(fill = "transparent", color = 'transparent'),
-             plot.background = element_rect(fill = "#068fa4", color = 'transparent'),
-             plot.title = element_text(face = "bold", size = 25, hjust = 0.5,
-                                       color = "#edc9c7", family = "Helvetica"),
-             axis.text = element_text(color = "#edc9c7", size = 15, family = "Helvetica"),
-             axis.title = element_text(color = "#edc9c7", size = 18, hjust = 0.5, family = "Helvetica"),
-             legend.key = element_rect(fill = "#068fa4", color = "transparent"),
-             legend.title = element_text(color = "#edc9c7", size = 18, family = "Helvetica"),
-             legend.background = element_rect(fill = "#068fa4", color = 'transparent'),
-             legend.text = element_text(color = "#edc9c7", size = 12, family = "Helvetica")) 
+       plot_theme
      
      
    })
@@ -224,17 +226,7 @@ theme_blue <- shinyDashboardThemeDIY(
        labs(title = paste0("Water consumption on ", input$waterDayOfWeek, "s"),
             x = "",
             y = "Amount of water consumed, in ml")+
-       theme(panel.grid = element_line(colour = "#edc9c7",linetype = "dotted"),
-             panel.background = element_rect(fill = "transparent", color = 'transparent'),
-             plot.background = element_rect(fill = "#068fa4", color = 'transparent'),
-             plot.title = element_text(face = "bold", size = 25, hjust = 0.5,
-                                       color = "#edc9c7", family = "Helvetica"),
-             axis.text = element_text(color = "#edc9c7", size = 15, family = "Helvetica"),
-             axis.title = element_text(color = "#edc9c7", size = 18, hjust = 0.5, family = "Helvetica"),
-             legend.key = element_rect(fill = "#068fa4", color = "transparent"),
-             legend.title = element_text(color = "#edc9c7", size = 18, family = "Helvetica"),
-             legend.background = element_rect(fill = "#068fa4", color = 'transparent'),
-             legend.text = element_text(color = "#edc9c7", size = 12, family = "Helvetica")) 
+       plot_theme
      
    })
    
@@ -274,7 +266,7 @@ body <- dashboardBody(
     tabName = "Water",
     
     fluidRow(
-      box(title = "Water intake"),
+      box(title = "Who of us drinks the most (water) on Fridays?"),
       column(width = 8,
              shinycssloaders::withSpinner(plotOutput("plotWaterWeekday"),
                                           type = getOption("spinner.type", default = 5),
@@ -286,8 +278,10 @@ body <- dashboardBody(
              uiOutput("waterDayOfWeek"))
       
     ),
+    br(),
+    br(),
     fluidRow(
-      box(title = "Correlation between water intake and daily steps"),
+      box(title = "Do we drink more water if we walk more?"),
       column(width = 8, 
              shinycssloaders::withSpinner(plotOutput("pointPlotWaterSteps"),
                                           type = getOption("spinner.type", default = 5),
