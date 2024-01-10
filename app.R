@@ -144,7 +144,32 @@ plot_theme <- theme(panel.grid = element_line(colour = "#edc9c7",linetype = "dot
    ### SLEEP ###
    
    ## wykres boxplot liczba godzin snu w zależności od dnia tygodnia 
+   output$sleepGentleman <- renderUI({
+     selectInput(
+       inputId = "sleepGentleman",
+       label = "Person:",
+       choices = unique(sleep_df$name)
+     )
+   })
    
+   
+   output$plotSleepGentleman <- renderPlot({
+     sleep_df %>%
+       filter(name == input$sleepGentleman) %>%
+       ggplot(aes(x = weekday, y = hm(duration), fill = input$sleepGentleman)) +  # Specify fill aesthetic
+       geom_boxplot() +
+       scale_y_time(labels = scales::time_format("%H:%M")) +
+       labs(x = "Weekday",
+            y = "Duration",
+            title = paste0("Distribution of sleep duration for ", input$sleepGentleman)) +
+       scale_fill_manual(values = c("Gentleman1" = "red", "Gentleman2" = "gold", "Gentleman3" = "orange")) +  # Assign colors
+       plot_theme+
+       guides(fill = FALSE)
+   })
+   
+   output$textSleepGentleman <- renderText({
+     "text sleep Gentleman"
+   })
    # output$boxPlotSleepHours <- renderPlot({
    #   ggplot()
    # })
@@ -308,17 +333,30 @@ body <- dashboardBody(
     )
   ),
   tabItem(
-    tabName = "Sleep",
+    tabName = "Steps",
     fluidRow(
       box(title = "What days do we walk the most?"),
       column(width = 8,
              shinycssloaders::withSpinner(plotOutput("colPlotSteps"),
                                           type = getOption("spinner.type", default = 5),
                                           color = getOption("spinner.color", default = "#edc9c7"))
-      ))
+      )),
+    
   ),
   tabItem(
-    tabName = "Steps"
+    tabName = "Sleep",
+    fluidRow(
+      box(title = "Sleep durtation"),
+      column(width = 8,
+             shinycssloaders::withSpinner(plotOutput("plotSleepGentleman"),
+                                          type = getOption("spinner.type", default = 5),
+                                          color = getOption("spinner.color", default = "#edc9c7"))
+      ),
+      column(width = 4,
+             textOutput("textSleepGentleman"),
+             br(),
+             uiOutput("sleepGentleman"))
+    )
   ),
   theme_blue
 )
