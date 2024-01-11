@@ -12,6 +12,7 @@ library(shinydashboardPlus)
 library(dashboardthemes)
 library(extrafont)
 library(showtext)
+library(lubridate)
 
 ### fonts 
 
@@ -19,8 +20,8 @@ library(showtext)
 # font_import()
 
 # default font
-loadfonts() 
-showtext_auto()
+#loadfonts() 
+#showtext_auto()
 #font_add("Inter", regular = "C:/my_repos/PersonalVisualizationProject/Inter/Inter-VariableFont_slnt,wght.ttf")
 
 
@@ -133,154 +134,151 @@ plot_theme <- theme(panel.grid = element_line(colour = "#edc9c7",linetype = "dot
                     legend.title = element_text(color = "#edc9c7", size = 18, family = "Helvetica"),
                     legend.background = element_rect(fill = "#068fa4", color = 'transparent'),
                     legend.text = element_text(color = "#edc9c7", size = 12, family = "Helvetica")) 
- 
+
 
 ### server
- 
- server <- function(input, output, session) {
-   
-   ### HOME PAGE ###
-   
-   ### SLEEP ###
-   
-   ## wykres boxplot liczba godzin snu w zależności od dnia tygodnia 
-   output$sleepGentleman <- renderUI({
-     selectInput(
-       inputId = "sleepGentleman",
-       label = "Person:",
-       choices = unique(sleep_df$name)
-     )
-   })
-   
-   
-   output$plotSleepGentleman <- renderPlot({
-     sleep_df %>%
-       filter(name == input$sleepGentleman) %>%
-       ggplot(aes(x = factor(weekday, levels = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")), 
-                  y = hm(duration), fill = input$sleepGentleman)) +  # Specify fill aesthetic
-       geom_boxplot() +
-       scale_y_time(labels = scales::time_format("%H:%M")) +
-       labs(x = "Weekday",
-            y = "Duration",
-            title = paste0("Distribution of sleep duration for ", input$sleepGentleman)) +
-       scale_fill_manual(values = c("Gentleman1" = "red", "Gentleman2" = "gold", "Gentleman3" = "orange")) +  # Assign colors
-       plot_theme+
-       guides(fill = FALSE)
-   })
-   
-   output$textSleepGentleman <- renderText({
-     "text sleep Gentleman"
-   })
-   # output$boxPlotSleepHours <- renderPlot({
-   #   ggplot()
-   # })
-   
-   ## wykres kolumnowy godzina rozpoczęcia snu w zal. od dnia tygodnia
-   
-   # output$colPlotSleepStart <- renderPlot({
-   #   ggplot()
-   # })
-   
-   ## wykres gęstosci godzina zakończenia snu w zal. od dnia tygodnia
-   
-   # output$densityPlotSleepEnd <- renderPlot({
-   #   ggplot()
-   # })
-   
-   ### STEPS ###
-   
-   ## wykres kolumnowy liczby przebiegniętych kroków (run_step)
-   
-   # output$colPlotRunning <- renderPlot({
-   #   ggplot()
-   # })
-   
-   ## wykres kolumnowy kroków dla poszczególnych dni
-   
-   output$colPlotSteps <- renderPlot({
-     weekdays <- distinct(steps_df[, c("date", "weekday")])
-     
-     
-     steps_df  %>% 
-       group_by(date, name) %>%
-       summarise(total_steps = sum(count)) %>%
-       inner_join(weekdays) %>% 
-       group_by(weekday, name) %>% 
-       summarise(avg_steps = mean(total_steps)) %>% 
-       ggplot(aes(fill = name,
-                  x = factor(weekday, levels = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")), 
-                  y = avg_steps)) +
-       geom_bar(position="dodge", stat="identity") +
-       scale_fill_manual(values = c("Gentleman1" = "red", "Gentleman2" = "gold", 
-                                     "Gentleman3" = "orange"),
-                          name = "Person:")+
-       labs(title = "Number of steps by day",
-            x = "Day of the week",
-            y = "Number of steps")+
-       plot_theme
-  })
-   
-   
-   ### WATER ###
-   
-   ## wykres korelacji woda/kroki
-   
-   output$pointPlotWaterSteps <- renderPlot({
-     
-     steps_modified <- steps_df %>% 
-       group_by(date) %>% 
-       summarise(total_steps = sum(count))
-     
-     
-     steps_modified %>% inner_join(water_df, by = "date") %>% 
-     ggplot()+
-       geom_point(aes(x = total_steps, y = amount, color = name), size = 3)+
-       scale_color_manual(values = c("Gentleman1" = "red", "Gentleman2" = "gold", 
-                                     "Gentleman3" = "orange"),
-                         name = "Person:")+
-       labs(title = "Correlation between daily steps and water intake",
-            x = "Total daily steps",
-            y = "Amount of water consumed, in ml")+
-       plot_theme
-     
-     
-   })
-   
-   output$textWaterSteps <- renderText({
-     "text Water Steps"
-   })
-   
-   ## wykres boxplot/violinplot woda w zal. od dnia tygodnia
-   
-   output$waterDayOfWeek <- renderUI({
-     selectInput(
-       inputId = "waterDayOfWeek",
-       label = "Day of week:",
-       choices = unique(water_df$weekday)
-     )
-   })
+
+server <- function(input, output, session) {
   
-   
-   output$plotWaterWeekday <- renderPlot({
-     ggplot(data = water_df %>% filter(weekday == input$waterDayOfWeek)) +
-       geom_violin(aes(x = name, y = amount, fill = name))+
-       geom_boxplot(aes(x = name, y = amount))+
-       ylim(c(500, 2500))+
-       scale_fill_manual(values = c("Gentleman1" = "red", "Gentleman2" = "gold", "Gentleman3" = "orange"),
+  ### HOME PAGE ###
+  
+  ### SLEEP ###
+  
+  ## wykres boxplot liczba godzin snu w zależności od dnia tygodnia 
+  output$sleepGentleman <- renderUI({
+    selectInput(
+      inputId = "sleepGentleman",
+      label = "Person:",
+      choices = unique(sleep_df$name)
+    )
+  })
+  
+  
+  output$plotSleepGentleman <- renderPlot({
+    sleep_df %>%
+      filter(name == input$sleepGentleman) %>%
+      ggplot(aes(x = factor(weekday, levels = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")), 
+                 y = hm(duration), fill = input$sleepGentleman)) +  # Specify fill aesthetic
+      geom_boxplot() +
+      scale_y_time(labels = scales::time_format("%H:%M")) +
+      labs(x = "Weekday",
+           y = "Duration",
+           title = paste0("Distribution of sleep duration for ", input$sleepGentleman)) +
+      scale_fill_manual(values = c("Gentleman1" = "red", "Gentleman2" = "gold", "Gentleman3" = "orange")) +  # Assign colors
+      plot_theme+
+      guides(fill = FALSE)
+  })
+  
+  output$textSleepGentleman <- renderText({
+    "text sleep Gentleman"
+  })
+  
+  
+  ## wykres kolumnowy godzina rozpoczęcia snu w zal. od dnia tygodnia ??
+  
+  # output$colPlotSleepStart <- renderPlot({
+  #   ggplot()
+  # })
+  
+  ## wykres gęstosci godzina zakończenia snu w zal. od dnia tygodnia
+  
+  # output$densityPlotSleepEnd <- renderPlot({
+  #   ggplot()
+  # })
+  
+  ### STEPS ###
+  
+  ## wykres kolumnowy liczby przebiegniętych kroków (run_step)
+  
+  # output$colPlotRunning <- renderPlot({
+  #   ggplot()
+  # })
+  
+  ## wykres kolumnowy kroków dla poszczególnych dni
+  
+  output$colPlotSteps <- renderPlot({
+    weekdays <- distinct(steps_df[, c("date", "weekday")])
+    
+    
+    steps_df  %>% 
+      group_by(date, name) %>%
+      summarise(total_steps = sum(count)) %>%
+      inner_join(weekdays) %>% 
+      group_by(weekday, name) %>% 
+      summarise(avg_steps = mean(total_steps)) %>% 
+      ggplot(aes(fill = name,
+                 x = factor(weekday, levels = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")), 
+                 y = avg_steps)) +
+      geom_bar(position="dodge", stat="identity") +
+      scale_fill_manual(values = c("Gentleman1" = "red", "Gentleman2" = "gold", 
+                                   "Gentleman3" = "orange"),
+                        name = "Person:")+
+      labs(title = "Number of steps by day",
+           x = "Day of the week",
+           y = "Number of steps")+
+      plot_theme
+  })
+  
+  
+  ### WATER ###
+  
+  ## wykres korelacji woda/kroki
+  
+  output$pointPlotWaterSteps <- renderPlot({
+    
+    steps_modified <- steps_df %>% 
+      group_by(date) %>% 
+      summarise(total_steps = sum(count))
+    
+    steps_modified %>% inner_join(water_df, by = "date") %>% 
+      ggplot()+
+      geom_point(aes(x = total_steps, y = amount, color = name), size = 3)+
+      scale_color_manual(values = c("Gentleman1" = "red", "Gentleman2" = "gold", 
+                                    "Gentleman3" = "orange"),
                          name = "Person:")+
-       labs(title = paste0("Water consumption on ", input$waterDayOfWeek, "s"),
-            x = "",
-            y = "Amount of water consumed, in ml")+
-       plot_theme
-     
-   })
-   
-   output$textWaterWeekday <- renderText({
-     "text Water Weekday"
-   })
-   
-   
- }
+      labs(title = "Correlation between daily steps and water intake",
+           x = "Total daily steps",
+           y = "Amount of water consumed, in ml")+
+      plot_theme
+    
+    
+  })
+  
+  output$textWaterSteps <- renderText({
+    "text Water Steps"
+  })
+  
+  ## wykres boxplot/violinplot woda w zal. od dnia tygodnia
+  
+  output$waterDayOfWeek <- renderUI({
+    selectInput(
+      inputId = "waterDayOfWeek",
+      label = "Day of week:",
+      choices = unique(water_df$weekday)
+    )
+  })
+  
+  
+  output$plotWaterWeekday <- renderPlot({
+    ggplot(data = water_df %>% filter(weekday == input$waterDayOfWeek)) +
+      geom_violin(aes(x = name, y = amount, fill = name))+
+      geom_point(aes(x=name, y=amount), size=2)+
+      ylim(c(500, 2500))+
+      scale_fill_manual(values = c("Gentleman1" = "red", "Gentleman2" = "gold", "Gentleman3" = "orange"),
+                        name = "Person:")+
+      labs(title = paste0("Water consumption on ", input$waterDayOfWeek, "s"),
+           x = "",
+           y = "Amount of water consumed, in ml")+
+      plot_theme
+    
+  })
+  
+  output$textWaterWeekday <- renderText({
+    "text Water Weekday"
+  })
+  
+  
+}
 
 
 ### UI
@@ -308,60 +306,60 @@ sidebar <- dashboardSidebar(
 
 body <- dashboardBody(
   tabItems(
-  tabItem(
-    tabName = "Water",
-    
-    fluidRow(
-      box(title = "Who of us drinks the most (water) on Fridays?"),
-      column(width = 8,
-             shinycssloaders::withSpinner(plotOutput("plotWaterWeekday"),
-                                          type = getOption("spinner.type", default = 5),
-                                          color = getOption("spinner.color", default = "#edc9c7"))
-             ),
-      column(width = 4,
-             textOutput("textWaterWeekday"),
-             br(),
-             uiOutput("waterDayOfWeek"))
+    tabItem(
+      tabName = "Water",
+      
+      fluidRow(
+        box(title = "Who of us drinks the most (water) on Fridays?"),
+        column(width = 8,
+               shinycssloaders::withSpinner(plotOutput("plotWaterWeekday"),
+                                            type = getOption("spinner.type", default = 5),
+                                            color = getOption("spinner.color", default = "#edc9c7"))
+        ),
+        column(width = 4,
+               textOutput("textWaterWeekday"),
+               br(),
+               uiOutput("waterDayOfWeek"))
+        
+      ),
+      br(),
+      br(),
+      fluidRow(
+        box(title = "Do we drink more water if we walk more?"),
+        column(width = 8, 
+               shinycssloaders::withSpinner(plotOutput("pointPlotWaterSteps"),
+                                            type = getOption("spinner.type", default = 5),
+                                            color = getOption("spinner.color", default = "#edc9c7"))),
+        column(width = 4,
+               textOutput("textWaterSteps"))
+      )
+    ),
+    tabItem(
+      tabName = "Steps",
+      fluidRow(
+        box(title = "What days do we walk the most?"),
+        column(width = 8,
+               shinycssloaders::withSpinner(plotOutput("colPlotSteps"),
+                                            type = getOption("spinner.type", default = 5),
+                                            color = getOption("spinner.color", default = "#edc9c7"))
+        )),
       
     ),
-    br(),
-    br(),
-    fluidRow(
-      box(title = "Do we drink more water if we walk more?"),
-      column(width = 8, 
-             shinycssloaders::withSpinner(plotOutput("pointPlotWaterSteps"),
-                                          type = getOption("spinner.type", default = 5),
-                                          color = getOption("spinner.color", default = "#edc9c7"))),
-      column(width = 4,
-             textOutput("textWaterSteps"))
-    )
-  ),
-  tabItem(
-    tabName = "Steps",
-    fluidRow(
-      box(title = "What days do we walk the most?"),
-      column(width = 8,
-             shinycssloaders::withSpinner(plotOutput("colPlotSteps"),
-                                          type = getOption("spinner.type", default = 5),
-                                          color = getOption("spinner.color", default = "#edc9c7"))
-      )),
-    
-  ),
-  tabItem(
-    tabName = "Sleep",
-    fluidRow(
-      box(title = "Sleep durtation"),
-      column(width = 8,
-             shinycssloaders::withSpinner(plotOutput("plotSleepGentleman"),
-                                          type = getOption("spinner.type", default = 5),
-                                          color = getOption("spinner.color", default = "#edc9c7"))
-      ),
-      column(width = 4,
-             textOutput("textSleepGentleman"),
-             br(),
-             uiOutput("sleepGentleman"))
-    )
-  )),
+    tabItem(
+      tabName = "Sleep",
+      fluidRow(
+        box(title = "Sleep durtation"),
+        column(width = 8,
+               shinycssloaders::withSpinner(plotOutput("plotSleepGentleman"),
+                                            type = getOption("spinner.type", default = 5),
+                                            color = getOption("spinner.color", default = "#edc9c7"))
+        ),
+        column(width = 4,
+               textOutput("textSleepGentleman"),
+               br(),
+               uiOutput("sleepGentleman"))
+      )
+    )),
   theme_blue
 )
 
