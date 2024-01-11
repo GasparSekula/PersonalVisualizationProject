@@ -156,7 +156,8 @@ plot_theme <- theme(panel.grid = element_line(colour = "#edc9c7",linetype = "dot
    output$plotSleepGentleman <- renderPlot({
      sleep_df %>%
        filter(name == input$sleepGentleman) %>%
-       ggplot(aes(x = weekday, y = hm(duration), fill = input$sleepGentleman)) +  # Specify fill aesthetic
+       ggplot(aes(x = factor(weekday, levels = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")), 
+                  y = hm(duration), fill = input$sleepGentleman)) +  # Specify fill aesthetic
        geom_boxplot() +
        scale_y_time(labels = scales::time_format("%H:%M")) +
        labs(x = "Weekday",
@@ -206,7 +207,9 @@ plot_theme <- theme(panel.grid = element_line(colour = "#edc9c7",linetype = "dot
        inner_join(weekdays) %>% 
        group_by(weekday, name) %>% 
        summarise(avg_steps = mean(total_steps)) %>% 
-       ggplot(aes(fill = name, x = weekday, y = avg_steps)) +
+       ggplot(aes(fill = name,
+                  x = factor(weekday, levels = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")), 
+                  y = avg_steps)) +
        geom_bar(position="dodge", stat="identity") +
        scale_fill_manual(values = c("Gentleman1" = "red", "Gentleman2" = "gold", 
                                      "Gentleman3" = "orange"),
@@ -304,6 +307,7 @@ sidebar <- dashboardSidebar(
 ## body
 
 body <- dashboardBody(
+  tabItems(
   tabItem(
     tabName = "Water",
     
@@ -357,7 +361,7 @@ body <- dashboardBody(
              br(),
              uiOutput("sleepGentleman"))
     )
-  ),
+  )),
   theme_blue
 )
 
