@@ -94,7 +94,7 @@ theme_blue <- shinyDashboardThemeDIY(
     ,boxDangerColor = "#068fa4"
     
   ,tabBoxTabColor = "#068fa4"
-    ,tabBoxTabTextSize = 16
+    ,tabBoxTabTextSize = 20
   ,tabBoxTabTextColor = "#068fa4"
     ,tabBoxTabTextColorSelected = "#068fa4"
     ,tabBoxBackColor = "#edc9c7"
@@ -116,6 +116,7 @@ theme_blue <- shinyDashboardThemeDIY(
   ,textboxBackColorSelect = "#068fa4"
     ,textboxBorderColorSelect = "#edc9c7"
     
+    
   ,tableBackColor = "#068fa4"
     ,tableBorderColor = "#edc9c7"
     ,tableBorderTopSize = 1
@@ -126,14 +127,15 @@ theme_blue <- shinyDashboardThemeDIY(
 plot_theme <- theme(panel.grid = element_line(colour = "#edc9c7",linetype = "dotted"),
                     panel.background = element_rect(fill = "transparent", color = 'transparent'),
                     plot.background = element_rect(fill = "#068fa4", color = 'transparent'),
-                    plot.title = element_text(face = "bold", size = 25, hjust = 0.5,
+                    plot.title = element_text(face = "bold", size = 20, hjust = 0.5,
                                               color = "#edc9c7", family = "Helvetica"),
-                    axis.text = element_text(color = "#edc9c7", size = 15, family = "Helvetica"),
-                    axis.title = element_text(color = "#edc9c7", size = 18, hjust = 0.5, family = "Helvetica"),
+                    axis.text = element_text(color = "#edc9c7", size = 10, family = "Helvetica"),
+                    axis.title = element_text(color = "#edc9c7", size = 12, hjust = 0.5, family = "Helvetica"),
                     legend.key = element_rect(fill = "#068fa4", color = "transparent"),
-                    legend.title = element_text(color = "#edc9c7", size = 18, family = "Helvetica"),
+                    legend.title = element_text(color = "#edc9c7", size = 16, family = "Helvetica"),
                     legend.background = element_rect(fill = "#068fa4", color = 'transparent'),
                     legend.text = element_text(color = "#edc9c7", size = 12, family = "Helvetica")) 
+
 
 
 ### server
@@ -224,13 +226,13 @@ server <- function(input, output, session) {
   
   ## wykres korelacji woda/kroki
   
-  output$pointPlotWaterSteps <- renderPlot({
+  output$pointPlotWaterSteps <- renderPlotly({
     
     steps_modified <- steps_df %>% 
       group_by(date) %>% 
       summarise(total_steps = sum(count))
     
-    steps_modified %>% inner_join(water_df, by = "date") %>% 
+    p <- steps_modified %>% inner_join(water_df, by = "date") %>% 
       ggplot()+
       geom_point(aes(x = total_steps, y = amount, color = name), size = 3)+
       scale_color_manual(values = c("Gentleman1" = "red", "Gentleman2" = "gold", 
@@ -240,6 +242,8 @@ server <- function(input, output, session) {
            x = "Total daily steps",
            y = "Amount of water consumed, in ml")+
       plot_theme
+    
+    ggplotly(p)
     
     
   })
@@ -253,29 +257,38 @@ server <- function(input, output, session) {
   output$waterDayOfWeek <- renderUI({
     selectInput(
       inputId = "waterDayOfWeek",
-      label = "Day of week:",
+      label = "Choose day of week:",
       choices = unique(water_df$weekday)
     )
   })
   
   
-  output$plotWaterWeekday <- renderPlot({
-    ggplot(data = water_df %>% filter(weekday == input$waterDayOfWeek)) +
-      geom_violin(aes(x = name, y = amount, fill = name))+
-      geom_point(aes(x=name, y=amount), size=2)+
+  output$plotWaterWeekday <- renderPlotly({
+    p1 <- ggplot() +
+      geom_violin(data = water_df, aes(x = name, y = amount, fill = name), alpha = 0.5)+
+      geom_point(data = water_df %>% filter(weekday == input$waterDayOfWeek), aes(x=name, y=amount), size=3, color = "#edc9c7")+
       ylim(c(500, 2500))+
       scale_fill_manual(values = c("Gentleman1" = "red", "Gentleman2" = "gold", "Gentleman3" = "orange"),
                         name = "Person:")+
       labs(title = paste0("Water consumption on ", input$waterDayOfWeek, "s"),
            x = "",
-           y = "Amount of water consumed, in ml")+
-      plot_theme
+           y = "Amount of water consumed, in ml")
+    
+    p2 <- p1 + plot_theme
+    
+    ggplotly(p2)
     
   })
   
   output$textWaterWeekday <- renderText({
-    "text Water Weekday"
-  })
+    "Is there a weekday on which we have tendency to drink the most water? \n
+    The plot visualizes the distribution of water consumption across our beloved individuals 
+    (Gentleman1, Gentleman2, and Gentleman3) on a specific day of the week selected below. 
+    The violin plot displays the probability density of water intake on all days, 
+    while the individual data points highlight the actual values for each person for selected weekday.
+
+ "
+  }) 
   
   
 }
@@ -312,11 +325,11 @@ body <- dashboardBody(
       fluidRow(
         box(title = "Who of us drinks the most (water) on Fridays?"),
         column(width = 8,
-               shinycssloaders::withSpinner(plotOutput("plotWaterWeekday"),
+               shinycssloaders::withSpinner(plotlyOutput("plotWaterWeekday"),
                                             type = getOption("spinner.type", default = 5),
                                             color = getOption("spinner.color", default = "#edc9c7"))
         ),
-        column(width = 4,
+        column(width = 3,
                textOutput("textWaterWeekday"),
                br(),
                uiOutput("waterDayOfWeek"))
@@ -327,7 +340,7 @@ body <- dashboardBody(
       fluidRow(
         box(title = "Do we drink more water if we walk more?"),
         column(width = 8, 
-               shinycssloaders::withSpinner(plotOutput("pointPlotWaterSteps"),
+               shinycssloaders::withSpinner(plotlyOutput("pointPlotWaterSteps"),
                                             type = getOption("spinner.type", default = 5),
                                             color = getOption("spinner.color", default = "#edc9c7"))),
         column(width = 4,
