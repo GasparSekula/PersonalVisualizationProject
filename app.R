@@ -156,8 +156,8 @@ server <- function(input, output, session) {
   })
   
   
-  output$plotSleepGentleman <- renderPlot({
-    sleep_df %>%
+  output$plotSleepGentleman <- renderPlotly({
+    p <- sleep_df %>%
       filter(name == input$sleepGentleman) %>%
       ggplot(aes(x = factor(weekday, levels = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")), 
                  y = hm(duration), fill = input$sleepGentleman)) +  # Specify fill aesthetic
@@ -169,6 +169,8 @@ server <- function(input, output, session) {
       scale_fill_manual(values = c("Gentleman1" = "red", "Gentleman2" = "gold", "Gentleman3" = "orange")) +  # Assign colors
       plot_theme+
       guides(fill = FALSE)
+    
+    ggplotly(p)
   })
   
   output$textSleepGentleman <- renderText({
@@ -182,6 +184,60 @@ server <- function(input, output, session) {
   #   ggplot()
   # })
   
+  
+  
+  output$histSleepStart <- renderPlotly({
+    p <- sleep_df %>%
+      filter(name == input$sleepGentleman) %>%
+      ggplot(aes(x = hour(ymd_hms(start_time)), fill = input$sleepGentleman)) +
+      geom_histogram(bins = 48) +
+      scale_x_continuous(breaks = seq(0, 23, by = 1), labels = sprintf("%02d:00", seq(0, 23, by = 1))) +
+      labs(x = "Hour of the Day",
+           y = "Count",
+           title = paste0("Distribution of sleep start times for ", input$sleepGentleman)) +
+      scale_fill_manual(values = c("Gentleman1" = "red", "Gentleman2" = "gold", "Gentleman3" = "orange")) +
+      plot_theme +
+      guides(fill = FALSE)+
+      theme(axis.text.x = element_text(angle = 45, hjust = 1))
+    
+    ggplotly(p)
+  })
+  
+  
+  
+  output$textSleepGentleman2 <- renderText({
+    "text sleep Gentleman"
+  })
+  
+  
+
+  
+  
+  output$histSleepEnd <- renderPlotly({
+    p <- sleep_df %>%
+      filter(name == input$sleepGentleman) %>%
+      ggplot(aes(x = hour(ymd_hms(end_time)), fill = input$sleepGentleman)) +
+      geom_histogram(bins = 48) +
+      scale_x_continuous(breaks = seq(0, 23, by = 1), labels = sprintf("%02d:00", seq(0, 23, by = 1)),
+                         limits = c(0, 23)) +
+      labs(x = "Hour of the Day",
+           y = "Count",
+           title = paste0("Distribution of sleep end times for ", input$sleepGentleman)) +
+      scale_fill_manual(values = c("Gentleman1" = "red", "Gentleman2" = "gold", "Gentleman3" = "orange")) +
+      plot_theme +
+      guides(fill = FALSE) +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels by 45 degrees
+    
+    ggplotly(p)
+  })
+  
+  
+  
+  
+  
+  output$textSleepGentleman3 <- renderText({
+    "text sleep Gentleman"
+  })
   ## wykres gęstosci godzina zakończenia snu w zal. od dnia tygodnia
   
   # output$densityPlotSleepEnd <- renderPlot({
@@ -363,7 +419,7 @@ body <- dashboardBody(
       fluidRow(
         box(title = "Sleep durtation"),
         column(width = 8,
-               shinycssloaders::withSpinner(plotOutput("plotSleepGentleman"),
+               shinycssloaders::withSpinner(plotlyOutput("plotSleepGentleman"),
                                             type = getOption("spinner.type", default = 5),
                                             color = getOption("spinner.color", default = "#edc9c7"))
         ),
@@ -371,7 +427,29 @@ body <- dashboardBody(
                textOutput("textSleepGentleman"),
                br(),
                uiOutput("sleepGentleman"))
-      )
+      ),
+      fluidRow(
+        box(title = "Sleep durtation"),
+        column(width = 8,
+               shinycssloaders::withSpinner(plotlyOutput("histSleepStart"),
+                                            type = getOption("spinner.type", default = 5),
+                                            color = getOption("spinner.color", default = "#edc9c7"))
+        ),
+        column(width = 4,
+               textOutput("textSleepGentleman2")
+               
+      )),
+      fluidRow(
+        box(title = "Sleep durtation"),
+        column(width = 8,
+               shinycssloaders::withSpinner(plotlyOutput("histSleepEnd"),
+                                            type = getOption("spinner.type", default = 5),
+                                            color = getOption("spinner.color", default = "#edc9c7"))
+        ),
+        column(width = 4,
+               textOutput("textSleepGentleman3")
+               
+        ))
     )),
   theme_blue
 )
