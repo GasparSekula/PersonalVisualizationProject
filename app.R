@@ -254,11 +254,11 @@ server <- function(input, output, session) {
   
   ## wykres kolumnowy kroków dla poszczególnych dni
   
-  output$colPlotSteps <- renderPlot({
+  output$colPlotSteps <- renderPlotly({
     weekdays <- distinct(steps_df[, c("date", "weekday")])
     
     
-    steps_df  %>% 
+    p <- steps_df  %>% 
       group_by(date, name) %>%
       summarise(total_steps = sum(count)) %>%
       inner_join(weekdays) %>% 
@@ -272,11 +272,34 @@ server <- function(input, output, session) {
                                    "Gentleman3" = "orange"),
                         name = "Person:")+
       labs(title = "Number of steps by day",
-           x = "Day of the week",
-           y = "Number of steps")+
+           x = "Weekday",
+           y = "Steps")+
       plot_theme
+    
+    ggplotly(p)
   })
   
+  ## wykres kolumnowy krokow dla dat z interaktywnym sliderem
+  
+  output$colPlotStepsByDate <- renderPlotly({
+    steps_modified <- steps_df %>% 
+      group_by(date, name) %>% 
+      summarise(total_steps = sum(count))
+    
+    p <- ggplot(steps_modified, aes(x = date, y = total_steps, fill = name)) + 
+      geom_bar(position="dodge", stat="identity") +
+      scale_fill_manual(values = c("Gentleman1" = "red", "Gentleman2" = "gold", 
+                                   "Gentleman3" = "orange"),
+                        name = "Person:")+
+      labs(title = "Number of steps by day",
+           x = "Weekday",
+           y = "Steps") +
+      plot_theme
+    
+    ggplotly(p) %>% 
+      layout(xaxis = list(rangeslider = list(type = "date")))
+    
+  })
   
   ### WATER ###
   
@@ -408,7 +431,15 @@ body <- dashboardBody(
       fluidRow(
         box(title = "What days do we walk the most?"),
         column(width = 8,
-               shinycssloaders::withSpinner(plotOutput("colPlotSteps"),
+               shinycssloaders::withSpinner(plotlyOutput("colPlotSteps"),
+                                            type = getOption("spinner.type", default = 5),
+                                            color = getOption("spinner.color", default = "#edc9c7"))
+        )),
+      
+      fluidRow(
+        box(title = "What days do we walk the most?"),
+        column(width = 12,
+               shinycssloaders::withSpinner(plotlyOutput("colPlotStepsByDate"),
                                             type = getOption("spinner.type", default = 5),
                                             color = getOption("spinner.color", default = "#edc9c7"))
         )),
