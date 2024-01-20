@@ -166,7 +166,7 @@ server <- function(input, output, session) {
       labs(x = "Weekday",
            y = "Duration",
            title = paste0("Distribution of sleep duration for ", input$sleepGentleman)) +
-      scale_fill_manual(values = c("Gentleman1" = "red", "Gentleman2" = "gold", "Gentleman3" = "orange")) +  # Assign colors
+      scale_fill_manual(values = c("Gentleman1" = "#B74F6F", "Gentleman2" = "#2D3047", "Gentleman3" = "#F39C3F")) +  # Assign colors
       plot_theme+
       guides(fill = FALSE)
     
@@ -195,7 +195,7 @@ server <- function(input, output, session) {
       labs(x = "Hour of the Day",
            y = "Count",
            title = paste0("Distribution of sleep start times for ", input$sleepGentleman)) +
-      scale_fill_manual(values = c("Gentleman1" = "red", "Gentleman2" = "gold", "Gentleman3" = "orange")) +
+      scale_fill_manual(values = c("Gentleman1" = "#B74F6F", "Gentleman2" = "#2D3047", "Gentleman3" = "#F39C3F")) +
       plot_theme +
       guides(fill = FALSE)+
       theme(axis.text.x = element_text(angle = 45, hjust = 1))
@@ -223,7 +223,7 @@ server <- function(input, output, session) {
       labs(x = "Hour of the Day",
            y = "Count",
            title = paste0("Distribution of sleep end times for ", input$sleepGentleman)) +
-      scale_fill_manual(values = c("Gentleman1" = "red", "Gentleman2" = "gold", "Gentleman3" = "orange")) +
+      scale_fill_manual(values = c("Gentleman1" = "#B74F6F", "Gentleman2" = "#2D3047", "Gentleman3" = "#F39C3F")) +
       plot_theme +
       guides(fill = FALSE) +
       theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels by 45 degrees
@@ -268,8 +268,8 @@ server <- function(input, output, session) {
                  x = factor(weekday, levels = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")), 
                  y = avg_steps)) +
       geom_bar(position="dodge", stat="identity") +
-      scale_fill_manual(values = c("Gentleman1" = "red", "Gentleman2" = "gold", 
-                                   "Gentleman3" = "orange"),
+      scale_fill_manual(values = c("Gentleman1" = "#B74F6F", "Gentleman2" = "#2D3047", 
+                                   "Gentleman3" = "#F39C3F"),
                         name = "Person:")+
       labs(title = "Number of steps by day",
            x = "Weekday",
@@ -288,8 +288,8 @@ server <- function(input, output, session) {
     
     p <- ggplot(steps_modified, aes(x = date, y = total_steps, fill = name)) + 
       geom_bar(position="dodge", stat="identity") +
-      scale_fill_manual(values = c("Gentleman1" = "red", "Gentleman2" = "gold", 
-                                   "Gentleman3" = "orange"),
+      scale_fill_manual(values = c("Gentleman1" = "#B74F6F", "Gentleman2" = "#2D3047", 
+                                   "Gentleman3" = "#F39C3F"),
                         name = "Person:")+
       labs(title = "Number of steps by day",
            x = "Weekday",
@@ -305,21 +305,43 @@ server <- function(input, output, session) {
   
   ## wykres korelacji woda/kroki
   
+  output$pointWaterStepsGents <- renderUI({
+    checkboxGroupInput("gentlemanCheckbox",
+                       label = "Select Gentlemen",
+                       choices = c("Gentleman1", "Gentleman2", "Gentleman3"),
+                       selected = c("Gentleman1", "Gentleman2", "Gentleman3"))
+  })
+  
+  output$pointWaterStepsWdDay <- renderUI({
+    checkboxGroupInput("weekdayCheckbox",
+                       label = "Select Weekdays",
+                       choices = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"),
+                       selected = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"))
+  })
+  
+  
   output$pointPlotWaterSteps <- renderPlotly({
     
+    selected_gentlemen <- input$gentlemanCheckbox
+    selected_weekdays <- input$weekdayCheckbox
+    
     steps_modified <- steps_df %>% 
-      group_by(date) %>% 
+      group_by(date, weekday) %>% 
       summarise(total_steps = sum(count))
     
-    p <- steps_modified %>% inner_join(water_df, by = "date") %>% 
-      ggplot()+
-      geom_point(aes(x = total_steps, y = amount, color = name), size = 3)+
-      scale_color_manual(values = c("Gentleman1" = "red", "Gentleman2" = "gold", 
-                                    "Gentleman3" = "orange"),
-                         name = "Person:")+
+    filtered_data <- steps_modified %>% 
+      left_join(water_df, by = "date") %>%
+      filter(name %in% selected_gentlemen & weekday.x %in% selected_weekdays)
+    
+    
+    p <- ggplot(filtered_data, aes(x = total_steps, y = amount, color = name)) +
+      geom_point(size = 3) +
+      scale_color_manual(values = c("Gentleman1" = "#B74F6F", "Gentleman2" = "#2D3047", 
+                                    "Gentleman3" = "#F39C3F"),
+                         name = "Person:") +
       labs(title = "Correlation between daily steps and water intake",
            x = "Total daily steps",
-           y = "Amount of water consumed, in ml")+
+           y = "Amount of water consumed, in ml") +
       plot_theme
     
     ggplotly(p)
@@ -328,8 +350,13 @@ server <- function(input, output, session) {
   })
   
   output$textWaterSteps <- renderText({
-    "text Water Steps"
+    "The scatter plot examines whether there is a relationship between the daily step count and water 
+    intake among three individuals. Each point on the plot represents a day, with the x-axis showing 
+    the total daily steps and the y-axis displaying the amount of water consumed in milliliters. 
+    By selecting specific gentlemen and weekdays through checkboxes, you can explore potential correlations 
+    and patterns between walking activity and water consumption."
   })
+  
   
   ## wykres boxplot/violinplot woda w zal. od dnia tygodnia
   
@@ -347,7 +374,7 @@ server <- function(input, output, session) {
       geom_violin(data = water_df, aes(x = name, y = amount, fill = name), alpha = 0.5)+
       geom_point(data = water_df %>% filter(weekday == input$waterDayOfWeek), aes(x=name, y=amount), size=3, color = "#edc9c7")+
       ylim(c(500, 2500))+
-      scale_fill_manual(values = c("Gentleman1" = "red", "Gentleman2" = "gold", "Gentleman3" = "orange"),
+      scale_fill_manual(values = c("Gentleman1" = "#B74F6F", "Gentleman2" = "#2D3047", "Gentleman3" = "#F39C3F"),
                         name = "Person:")+
       labs(title = paste0("Water consumption on ", input$waterDayOfWeek, "s"),
            x = "",
@@ -369,6 +396,28 @@ server <- function(input, output, session) {
  "
   }) 
   
+  output$textHomeAboutUs <- renderUI({
+    HTML("Embark on a journey of self-discovery and transformation with the remarkable individuals behind the 'ME project.'
+  Meet Gentleman1, Gentleman2, and Gentleman3 – three distinct personalities united by a common quest for personal growth and well-being.<br>
+  For G1, a healthy lifestyle is very important, including regular exercise, regular and healthy meals or a long sleep of more than eight hours. 
+  Gentleman2, XXX
+  Meanwhile, Gentleman3, XXX <br>
+  Together, they invite you to delve into their individual narratives, sharing insights, challenges, and triumphs on the path to a better version of themselves.
+  The 'ME project' is not just a journey; it's an exploration of the intricate facets that make them who they are.
+  Join us as we witness the unfolding chapters of self-awareness and well-being in the lives of Gentleman1, Gentleman2, and Gentleman3 – the driving forces behind the 'ME project.'")
+  })
+  
+  
+  
+  output$textHomeMethods <- renderUI({
+    HTML("In the pursuit of understanding and enhancing our well-being, we embarked on a health data collection journey through Samsung Health. Commencing from the early days of December 23, our endeavor continued until the dawn of January 2024. Throughout this period, we meticulously gathered and analyzed data pertaining to three vital aspects of our health: steps taken, water intake, and sleep duration.
+
+This initiative aimed not only to capture the quantitative metrics of our daily activities but also to uncover potential correlations and patterns that could provide valuable insights into our overall health and lifestyle. The collected data spans across various dimensions, allowing us to delve into the nuances of our physical activity, hydration levels, and the quality of our sleep.
+
+Through the integration of cutting-edge technology and the commitment to personal well-being, we present a comprehensive exploration into the intricacies of our health data. Join us as we navigate through the rich tapestry of information gathered from Samsung Health, unraveling the story of our daily steps, water consumption habits, and the rejuvenating hours we devote to restful sleep.
+")
+  })
+  
   
 }
 
@@ -386,9 +435,10 @@ header <- dashboardHeader(
 
 sidebar <- dashboardSidebar(
   sidebarMenu(
-    menuItem("Sleep", tabName = "Sleep"),
-    menuItem("Steps", tabName = "Steps"),
-    menuItem("Water", tabName = "Water")
+    menuItem("Home", tabName = "Home", icon = icon("home")),
+    menuItem("Sleep", tabName = "Sleep", icon = icon("bed")),
+    menuItem("Steps", tabName = "Steps", icon = icon("heartbeat")),
+    menuItem("Water", tabName = "Water", icon = icon("tint"))
   ),
   width = 250
   
@@ -398,6 +448,21 @@ sidebar <- dashboardSidebar(
 
 body <- dashboardBody(
   tabItems(
+    tabItem(
+      tabName = "Home",
+      
+      fluidRow(
+        box(title = "About Collecting Data", uiOutput("textHomeMethods"))
+        
+      ),
+      br(),
+      br(),
+      br(),
+      fluidRow(
+        box(title = "About Us", uiOutput("textHomeAboutUs")),
+      )
+      
+    ),
     tabItem(
       tabName = "Water",
       
@@ -423,9 +488,15 @@ body <- dashboardBody(
                                             type = getOption("spinner.type", default = 5),
                                             color = getOption("spinner.color", default = "#edc9c7"))),
         column(width = 4,
-               textOutput("textWaterSteps"))
-      )
-    ),
+               textOutput("textWaterSteps"),
+               br(),
+               uiOutput("pointWaterStepsGents"),
+               br(),
+               uiOutput("pointWaterStepsWdDay")
+               
+               
+        )
+      )),
     tabItem(
       tabName = "Steps",
       fluidRow(
