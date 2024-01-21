@@ -179,9 +179,9 @@ sleep_1_df <- sleep_1_df %>%
   select("start_time", "end_time") %>% 
   mutate(start_time = ymd_hms(start_time),
          end_time = ymd_hms(end_time),
-         duration = sprintf("%02d:%02d", 
-                            floor(as.numeric(difftime(end_time, start_time, units = "mins")) / 60), 
-                            as.numeric(difftime(end_time, start_time, units = "mins")) %% 60),
+         duration = sprintf("%02d:%02d",
+                            floor(as.numeric(difftime(end_time, start_time, units = "mins")) / 60),
+                            floor(as.numeric(difftime(end_time, start_time, units = "mins")) %% 60)),
          day = day(end_time),
          weekday = wday(end_time, label = TRUE, abbr = FALSE, locale = "en_US"),
          name = "Gentleman1")

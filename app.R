@@ -266,7 +266,8 @@ server <- function(input, output, session) {
       summarise(avg_steps = mean(total_steps)) %>% 
       ggplot(aes(fill = name,
                  x = factor(weekday, levels = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")), 
-                 y = avg_steps)) +
+                 y = avg_steps,
+                 text = paste("Person: ", name, "<br>Weekday: ", weekday, "<br>Average Steps: ", avg_steps))) +
       geom_bar(position="dodge", stat="identity") +
       scale_fill_manual(values = c("Gentleman1" = "#B74F6F", "Gentleman2" = "#2D3047", 
                                    "Gentleman3" = "#F39C3F"),
@@ -276,25 +277,40 @@ server <- function(input, output, session) {
            y = "Steps")+
       plot_theme
     
-    ggplotly(p)
+    ggplotly(p) %>%
+      add_trace(
+        hoverinfo = 'text'
+      )
   })
   
-  ## wykres kolumnowy krokow dla dat z interaktywnym sliderem
+  ## wykres krokow dla dat z interaktywnym sliderem
+  
+  output$stepsGents <- renderUI({
+    checkboxGroupInput("gentlemanCheckboxSteps",
+                       label = "Select Gentlemen",
+                       choices = c("Gentleman1", "Gentleman2", "Gentleman3"),
+                       selected = c("Gentleman1", "Gentleman2", "Gentleman3"))
+  })
+  
+  #selected_gentlemen <- input$gentlemanCheckboxSteps
   
   output$colPlotStepsByDate <- renderPlotly({
     steps_modified <- steps_df %>% 
       group_by(date, name) %>% 
-      summarise(total_steps = sum(count))
+      summarise(total_steps = sum(count)) 
+      #filter(name %in% selected_gentlemen)
     
-    p <- ggplot(steps_modified, aes(x = date, y = total_steps, fill = name)) + 
-      geom_bar(position="dodge", stat="identity") +
-      scale_fill_manual(values = c("Gentleman1" = "#B74F6F", "Gentleman2" = "#2D3047", 
-                                   "Gentleman3" = "#F39C3F"),
-                        name = "Person:")+
+    p <- ggplot(steps_modified[-1,], aes(x = date, y = total_steps, color = name)) + 
+      geom_line(aes(group=1)) +
+      geom_point() + 
+      plot_theme +
+      scale_color_manual(values = c("Gentleman1" = "#B74F6F", "Gentleman2" = "#2D3047", 
+                                    "Gentleman3" = "#F39C3F"),
+                         name = "Person:") +
       labs(title = "Number of steps by day",
            x = "Weekday",
            y = "Steps") +
-      plot_theme
+      theme(axis.text.x = element_text(angle = 45, hjust = 1))
     
     ggplotly(p) %>% 
       layout(xaxis = list(rangeslider = list(type = "date")))
@@ -401,7 +417,7 @@ server <- function(input, output, session) {
   Meet Gentleman1, Gentleman2, and Gentleman3 – three distinct personalities united by a common quest for personal growth and well-being.<br>
   For G1, a healthy lifestyle is very important, including regular exercise, regular and healthy meals or a long sleep of more than eight hours. 
   Gentleman2, XXX
-  Meanwhile, Gentleman3, XXX <br>
+  Meanwhile, Gentleman3 is also trying to sleep at least 8 hours and it is important for him to go for a walk everyday. <br>
   Together, they invite you to delve into their individual narratives, sharing insights, challenges, and triumphs on the path to a better version of themselves.
   The 'ME project' is not just a journey; it's an exploration of the intricate facets that make them who they are.
   Join us as we witness the unfolding chapters of self-awareness and well-being in the lives of Gentleman1, Gentleman2, and Gentleman3 – the driving forces behind the 'ME project.'")
@@ -509,11 +525,16 @@ body <- dashboardBody(
       
       fluidRow(
         box(title = "What days do we walk the most?"),
+        column(width = 4,
+               textOutput("Choose Gentleman"),
+               br(),
+               uiOutput("stepsGents")
+        ),
         column(width = 12,
                shinycssloaders::withSpinner(plotlyOutput("colPlotStepsByDate"),
                                             type = getOption("spinner.type", default = 5),
-                                            color = getOption("spinner.color", default = "#edc9c7"))
-        )),
+                                            color = getOption("spinner.color", default = "#edc9c7")))
+        ),
       
     ),
     tabItem(
