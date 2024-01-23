@@ -174,7 +174,8 @@ server <- function(input, output, session) {
   })
   
   output$textSleepGentleman <- renderText({
-    "text sleep Gentleman"
+    "How long do we sleep. This boxplot shows the distribution of sleep by the weekday for a chosen Gentleman.
+    This gives an insight on what are our sleep tendencies. This is one of the most important factors regarding our health, so this makes it important to keep this around 7 to 9 hours."
   })
   
   
@@ -206,7 +207,7 @@ server <- function(input, output, session) {
   
   
   output$textSleepGentleman2 <- renderText({
-    "text sleep Gentleman"
+    "Uncover the diverse going to sleep habits of the distinctive personalities within the 'ME project'—Gentleman1, Gentleman2, and Gentleman3—with this interactive histogram. This visual representation displays the distribution of wake-up times throughout a 24-hour period, allowing you to explore the nuances of their evening routines."
   })
   
   
@@ -236,7 +237,7 @@ server <- function(input, output, session) {
   
   
   output$textSleepGentleman3 <- renderText({
-    "text sleep Gentleman"
+    "Uncover the diverse wake-up habits of the distinctive personalities within the 'ME project'—Gentleman1, Gentleman2, and Gentleman3—with this interactive histogram. This visual representation displays the distribution of wake-up times throughout a 24-hour period, allowing you to explore the nuances of their morning routines."
   })
   ## wykres gęstosci godzina zakończenia snu w zal. od dnia tygodnia
   
@@ -540,7 +541,7 @@ body <- dashboardBody(
     tabItem(
       tabName = "Sleep",
       fluidRow(
-        box(title = "Sleep durtation"),
+        box(title = "How long do we sleep?"),
         column(width = 8,
                shinycssloaders::withSpinner(plotlyOutput("plotSleepGentleman"),
                                             type = getOption("spinner.type", default = 5),
@@ -552,7 +553,7 @@ body <- dashboardBody(
                uiOutput("sleepGentleman"))
       ),
       fluidRow(
-        box(title = "Sleep durtation"),
+        box(title = "At what hours do we go to sleep?"),
         column(width = 8,
                shinycssloaders::withSpinner(plotlyOutput("histSleepStart"),
                                             type = getOption("spinner.type", default = 5),
@@ -563,7 +564,7 @@ body <- dashboardBody(
                
       )),
       fluidRow(
-        box(title = "Sleep durtation"),
+        box(title = "When do we wake up?"),
         column(width = 8,
                shinycssloaders::withSpinner(plotlyOutput("histSleepEnd"),
                                             type = getOption("spinner.type", default = 5),
