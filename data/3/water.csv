@@ -1,4 +1,4 @@
-﻿com.samsung.health.water_intake,6260063,5
+﻿com.samsung.health.water_intake,6261011,5
 start_time,amount,custom,update_time,create_time,time_offset,deviceuuid,unit_amount,comment,pkg_name,datauuid
 2023-12-06 22:49:06.859,250.0,,2023-12-06 22:49:07.215,2023-12-06 22:49:07.215,UTC+0100,YygnjwRWuX,250.0,,com.sec.android.app.shealth,648216f2-72a8-465d-9e25-89bd71b50ac1,
 2023-12-06 22:49:07.627,250.0,,2023-12-06 22:49:07.982,2023-12-06 22:49:07.982,UTC+0100,YygnjwRWuX,250.0,,com.sec.android.app.shealth,7116de7a-2768-441b-906e-4ae3d2fbca07,
