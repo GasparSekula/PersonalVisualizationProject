@@ -246,12 +246,6 @@ server <- function(input, output, session) {
   
   ### STEPS ###
   
-  ## wykres kolumnowy liczby przebiegniętych kroków (run_step)
-  
-  # output$colPlotRunning <- renderPlot({
-  #   ggplot()
-  # })
-  
   ## wykres kolumnowy kroków dla poszczególnych dni
   
   output$colPlotSteps <- renderPlotly({
@@ -283,16 +277,14 @@ server <- function(input, output, session) {
       )
   })
   
-  ## wykres krokow dla dat z interaktywnym sliderem
-  
-  output$stepsGents <- renderUI({
-    checkboxGroupInput("gentlemanCheckboxSteps",
-                       label = "Select Gentlemen",
-                       choices = c("Gentleman1", "Gentleman2", "Gentleman3"),
-                       selected = c("Gentleman1", "Gentleman2", "Gentleman3"))
+  output$textBarSteps <- renderText({
+    "This grouped bar plot showcases the average number of steps taken by three individuals over the course of a week.
+     Each weekday is represented by a distinct bar, and the height of each bar corresponds to the average number of steps
+     taken by each Gentleman on that specific day. The plot provides a comprehensive overview of their weekly step 
+     patterns, offering insights into their activity levels throughout the weekdays."
   })
   
-  #selected_gentlemen <- input$gentlemanCheckboxSteps
+  ## wykres krokow dla dat z interaktywnym sliderem
   
   output$colPlotStepsByDate <- renderPlotly({
     steps_modified <- steps_df %>% 
@@ -315,6 +307,15 @@ server <- function(input, output, session) {
     ggplotly(p) %>% 
       layout(xaxis = list(rangeslider = list(type = "date")))
     
+  })
+  
+  output$textLineSteps <- renderText({
+    "This dynamic line plot presents the daily step counts for the time period spanning
+     from December 17th to January 22nd. The plot is designed with an interactive X axis,
+     allowing users to choose and adjust the time interval for a customized view of the data.
+     Each date on the plot is associated with a specific step count, providing a detailed representation
+     of the individuals' daily activity levels. The interactive feature enhances the user experience by
+     enabling a more personalized exploration of the step data over the selected time frame."
   })
   
   ### WATER ###
@@ -519,21 +520,20 @@ body <- dashboardBody(
         box(title = "What days do we walk the most?"),
         column(width = 8,
                shinycssloaders::withSpinner(plotlyOutput("colPlotSteps"),
-                                            type = getOption("spinner.type", default = 5),
-                                            color = getOption("spinner.color", default = "#edc9c7"))
-        )),
-      
+                                            type = getOption("spinner.type", default = 5))),
+        column(width = 3,
+               textOutput("textBarSteps"))
+        ),
+      br(),
+      br(),
       fluidRow(
         box(title = "What days do we walk the most?"),
-        column(width = 4,
-               textOutput("Choose Gentleman"),
-               br(),
-               uiOutput("stepsGents")
-        ),
         column(width = 12,
                shinycssloaders::withSpinner(plotlyOutput("colPlotStepsByDate"),
                                             type = getOption("spinner.type", default = 5),
-                                            color = getOption("spinner.color", default = "#edc9c7")))
+                                            color = getOption("spinner.color", default = "#edc9c7"))),
+        column(width = 10,
+               textOutput("textLineSteps"))
         ),
       
     ),
