@@ -418,8 +418,8 @@ server <- function(input, output, session) {
     HTML("Embark on a journey of self-discovery and transformation with the remarkable individuals behind the 'ME project.'
   Meet Gentleman1, Gentleman2, and Gentleman3 – three distinct personalities united by a common quest for personal growth and well-being.<br>
   For G1, a healthy lifestyle is very important, including regular exercise, regular and healthy meals or a long sleep of more than eight hours. 
-  Gentleman2, XXX
-  Meanwhile, Gentleman3 is also trying to sleep at least 8 hours and it is important for him to go for a walk everyday. <br>
+  Gentleman2 is also trying to sleep at least 8 hours and it is important for him to go for a walk everyday.
+  Meanwhile, Gentleman3 is a runner at heart, so his daily steps may outstand. <br>
   Together, they invite you to delve into their individual narratives, sharing insights, challenges, and triumphs on the path to a better version of themselves.
   The 'ME project' is not just a journey; it's an exploration of the intricate facets that make them who they are.
   Join us as we witness the unfolding chapters of self-awareness and well-being in the lives of Gentleman1, Gentleman2, and Gentleman3 – the driving forces behind the 'ME project.'")
