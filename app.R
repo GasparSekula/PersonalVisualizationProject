@@ -1,5 +1,4 @@
 ### libraries and packages
-
 library(shiny)
 library(dplyr)
 library(ggplot2)
@@ -13,7 +12,7 @@ library(dashboardthemes)
 library(extrafont)
 library(showtext)
 library(lubridate)
-
+library(scales)
 ### fonts 
 
 # import fonts - takes ~5 minutes 
@@ -142,6 +141,11 @@ plot_theme <- theme(panel.grid = element_line(colour = "#edc9c7",linetype = "dot
 
 server <- function(input, output, session) {
   
+  print("Server function is running!")  # Add more print statements as needed
+  
+  steps_df <- read.csv("data/final/stepsdf.csv")
+  water_df <- read.csv("data/final/waterdf.csv")
+  sleep_df <- read.csv("data/final/sleepdf.csv")
   ### HOME PAGE ###
   
   ### SLEEP ###
@@ -157,17 +161,23 @@ server <- function(input, output, session) {
   
   
   output$plotSleepGentleman <- renderPlotly({
+    selected_gentleman <- input$sleepGentleman
+    
+    if (is.null(selected_gentleman)) {
+      return(NULL)  # Handle the case where no Gentleman is selected
+    }
+    
     p <- sleep_df %>%
-      filter(name == input$sleepGentleman) %>%
+      filter(name == selected_gentleman) %>%
       ggplot(aes(x = factor(weekday, levels = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")), 
-                 y = hm(duration), fill = input$sleepGentleman)) +  # Specify fill aesthetic
+                 y = hm(duration), fill = selected_gentleman)) +
       geom_boxplot() +
-      scale_y_time(labels = scales::time_format("%H:%M")) +
+      scale_y_continuous(labels = function(x) sprintf("%.1f h", x / 3600),breaks =seq(0, 24*3600, by = 3600)) + 
       labs(x = "Weekday",
            y = "Duration",
-           title = paste0("Distribution of sleep duration for ", input$sleepGentleman)) +
-      scale_fill_manual(values = c("Gentleman1" = "#B74F6F", "Gentleman2" = "#2D3047", "Gentleman3" = "#F39C3F")) +  # Assign colors
-      plot_theme+
+           title = paste0("Distribution of sleep duration for ", selected_gentleman)) +
+      scale_fill_manual(values = c("Gentleman1" = "#B74F6F", "Gentleman2" = "#59608E", "Gentleman3" = "#F39C3F")) +
+      plot_theme +
       guides(fill = FALSE)
     
     ggplotly(p)
@@ -196,7 +206,7 @@ server <- function(input, output, session) {
       labs(x = "Hour of the Day",
            y = "Count",
            title = paste0("Distribution of sleep start times for ", input$sleepGentleman)) +
-      scale_fill_manual(values = c("Gentleman1" = "#B74F6F", "Gentleman2" = "#2D3047", "Gentleman3" = "#F39C3F")) +
+      scale_fill_manual(values = c("Gentleman1" = "#B74F6F", "Gentleman2" = "#59608E", "Gentleman3" = "#F39C3F")) +
       plot_theme +
       guides(fill = FALSE)+
       theme(axis.text.x = element_text(angle = 45, hjust = 1))
@@ -224,7 +234,7 @@ server <- function(input, output, session) {
       labs(x = "Hour of the Day",
            y = "Count",
            title = paste0("Distribution of sleep end times for ", input$sleepGentleman)) +
-      scale_fill_manual(values = c("Gentleman1" = "#B74F6F", "Gentleman2" = "#2D3047", "Gentleman3" = "#F39C3F")) +
+      scale_fill_manual(values = c("Gentleman1" = "#B74F6F", "Gentleman2" = "#59608E", "Gentleman3" = "#F39C3F")) +
       plot_theme +
       guides(fill = FALSE) +
       theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels by 45 degrees
@@ -264,7 +274,7 @@ server <- function(input, output, session) {
                  y = avg_steps,
                  text = paste("Person: ", name, "<br>Weekday: ", weekday, "<br>Average Steps: ", avg_steps))) +
       geom_bar(position="dodge", stat="identity") +
-      scale_fill_manual(values = c("Gentleman1" = "#B74F6F", "Gentleman2" = "#2D3047", 
+      scale_fill_manual(values = c("Gentleman1" = "#B74F6F", "Gentleman2" = "#59608E", 
                                    "Gentleman3" = "#F39C3F"),
                         name = "Person:")+
       labs(title = "Number of steps by day",
@@ -297,7 +307,7 @@ server <- function(input, output, session) {
       geom_line(aes(group=1)) +
       geom_point() + 
       plot_theme +
-      scale_color_manual(values = c("Gentleman1" = "#B74F6F", "Gentleman2" = "#2D3047", 
+      scale_color_manual(values = c("Gentleman1" = "#B74F6F", "Gentleman2" = "#59608E", 
                                     "Gentleman3" = "#F39C3F"),
                          name = "Person:") +
       labs(title = "Number of steps by day",
@@ -354,7 +364,7 @@ server <- function(input, output, session) {
     
     p <- ggplot(filtered_data, aes(x = total_steps, y = amount, color = name)) +
       geom_point(size = 3) +
-      scale_color_manual(values = c("Gentleman1" = "#B74F6F", "Gentleman2" = "#2D3047", 
+      scale_color_manual(values = c("Gentleman1" = "#B74F6F", "Gentleman2" = "#59608E", 
                                     "Gentleman3" = "#F39C3F"),
                          name = "Person:") +
       labs(title = "Correlation between daily steps and water intake",
@@ -392,7 +402,7 @@ server <- function(input, output, session) {
       geom_violin(data = water_df, aes(x = name, y = amount, fill = name), alpha = 0.5)+
       geom_point(data = water_df %>% filter(weekday == input$waterDayOfWeek), aes(x=name, y=amount), size=3, color = "#edc9c7")+
       ylim(c(500, 2500))+
-      scale_fill_manual(values = c("Gentleman1" = "#B74F6F", "Gentleman2" = "#2D3047", "Gentleman3" = "#F39C3F"),
+      scale_fill_manual(values = c("Gentleman1" = "#B74F6F", "Gentleman2" = "#59608E", "Gentleman3" = "#F39C3F"),
                         name = "Person:")+
       labs(title = paste0("Water consumption on ", input$waterDayOfWeek, "s"),
            x = "",
