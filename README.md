@@ -48,6 +48,6 @@ This Shiny web application offers a comprehensive analysis of health data collec
 
 ## Developers
 
-Developed by: [@Michał Pytel](https://github.com/Michael-Pytel), [@Gaspar Sekula](https://github.com/GasparSekula), [@Michał Piechota](https://github.com/Frejzy)
+Developed by: [@Michał Pytel](https://github.com/Michael-Pytel), [@Gaspar Sekula](https://github.com/GasparSekula), [@Michał Piechota](https://github.com/piechotam)
 
 **Disclaimer:** This app is not intended for medical or diagnostic purposes. Consult with a healthcare professional for personalized health advice.
